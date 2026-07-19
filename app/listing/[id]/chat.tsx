@@ -5,11 +5,15 @@ import { useLocalSearchParams } from 'expo-router';
 import { AppButton } from '@/components/AppButton';
 import { AppTextField } from '@/components/AppTextField';
 import { AsyncStateView } from '@/components/AsyncStateView';
+import { RatingStars } from '@/components/RatingStars';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { useListingChat } from '@/hooks/useListingChat';
+import { useListingReview } from '@/hooks/useListingReview';
+import { useRatingSummary } from '@/hooks/useRatingSummary';
 import { useTheme } from '@/theme';
 import { resolveExternalContactAction } from '@/utils/contact';
 import type { Message } from '@/types/message';
+import type { Review } from '@/types/review';
 
 /**
  * Thread de contato mock por anúncio (US5, T027-T028). Sem WebSocket/push
@@ -40,6 +44,18 @@ export default function ListingChatScreen() {
   } = useListingChat(id);
   const [draft, setDraft] = useState('');
 
+  const {
+    average: ownerRatingAverage,
+    count: ownerRatingCount,
+    refresh: refreshRatingSummary,
+  } = useRatingSummary(ownerProfile?.id);
+  const {
+    existingReview,
+    canReview,
+    submitting: submittingReview,
+    submit: submitReview,
+  } = useListingReview(id, ownerProfile?.id);
+
   const handleSend = useCallback(async () => {
     if (!draft.trim()) {
       return;
@@ -47,6 +63,14 @@ export default function ListingChatScreen() {
     await send(draft);
     setDraft('');
   }, [draft, send]);
+
+  const handleSubmitReview = useCallback(
+    async (stars: 1 | 2 | 3 | 4 | 5, comment?: string) => {
+      await submitReview(stars, comment);
+      await refreshRatingSummary();
+    },
+    [refreshRatingSummary, submitReview],
+  );
 
   const contactAction = resolveExternalContactAction(ownerProfile?.externalContact);
   const handleOpenExternalContact = useCallback(async () => {
@@ -81,6 +105,9 @@ export default function ListingChatScreen() {
           <Text style={{ color: theme.colors.textMuted, fontSize: theme.typography.size.sm }}>
             Conversa com {ownerProfile?.name ?? 'o vendedor'}
           </Text>
+          {ownerProfile ? (
+            <RatingStars rating={ownerRatingAverage} count={ownerRatingCount} showValue size={16} />
+          ) : null}
         </View>
 
         {contactAction ? (
@@ -115,6 +142,14 @@ export default function ListingChatScreen() {
           }
         />
 
+        {canReview ? (
+          <ReviewSection
+            existingReview={existingReview}
+            submitting={submittingReview}
+            onSubmit={handleSubmitReview}
+          />
+        ) : null}
+
         {isOwnListing ? (
           <Text
             style={{
@@ -148,6 +183,91 @@ export default function ListingChatScreen() {
         )}
       </AsyncStateView>
     </ScreenContainer>
+  );
+}
+
+type ReviewSectionProps = {
+  existingReview: Review | null;
+  submitting: boolean;
+  onSubmit: (stars: 1 | 2 | 3 | 4 | 5, comment?: string) => Promise<void>;
+};
+
+/**
+ * Ponto de entrada da avaliação pós-anúncio (US6, T031): renderizado apenas
+ * quando `useListingReview` já garantiu que o usuário pode avaliar (não é o
+ * próprio dono, T032). Mostra a avaliação já enviada em modo leitura, ou o
+ * formulário (estrelas + comentário opcional) caso ainda não exista uma.
+ */
+function ReviewSection({ existingReview, submitting, onSubmit }: ReviewSectionProps) {
+  const theme = useTheme();
+  const [stars, setStars] = useState<1 | 2 | 3 | 4 | 5>(5);
+  const [comment, setComment] = useState('');
+
+  if (existingReview) {
+    return (
+      <View
+        style={[
+          styles.reviewSection,
+          {
+            gap: theme.spacing.xs,
+            marginTop: theme.spacing.md,
+            borderColor: theme.colors.border,
+            borderRadius: theme.radius.md,
+            padding: theme.spacing.md,
+          },
+        ]}
+      >
+        <Text style={{ color: theme.colors.textMuted, fontSize: theme.typography.size.sm }}>
+          Sua avaliação deste vendedor
+        </Text>
+        <RatingStars rating={existingReview.stars} size={18} />
+        {existingReview.comment ? (
+          <Text style={{ color: theme.colors.text, fontSize: theme.typography.size.sm }}>
+            {existingReview.comment}
+          </Text>
+        ) : null}
+      </View>
+    );
+  }
+
+  return (
+    <View
+      style={[
+        styles.reviewSection,
+        {
+          gap: theme.spacing.sm,
+          marginTop: theme.spacing.md,
+          borderColor: theme.colors.border,
+          borderRadius: theme.radius.md,
+          padding: theme.spacing.md,
+        },
+      ]}
+    >
+      <Text
+        style={{
+          color: theme.colors.text,
+          fontSize: theme.typography.size.md,
+          fontWeight: '600',
+        }}
+      >
+        Avaliar vendedor
+      </Text>
+      <RatingStars rating={stars} onChange={setStars} size={24} />
+      <AppTextField
+        label="Comentário (opcional)"
+        placeholder="Como foi a experiência com esse anúncio?"
+        value={comment}
+        onChangeText={setComment}
+        multiline
+      />
+      <AppButton
+        label="Enviar avaliação"
+        icon="star-outline"
+        variant="secondary"
+        loading={submitting}
+        onPress={() => onSubmit(stars, comment)}
+      />
+    </View>
   );
 }
 
@@ -201,6 +321,9 @@ const styles = StyleSheet.create({
   },
   composerInput: {
     flex: 1,
+  },
+  reviewSection: {
+    borderWidth: 1,
   },
   bubbleRow: {
     flexDirection: 'row',
