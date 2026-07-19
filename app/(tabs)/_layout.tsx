@@ -1,15 +1,38 @@
 import React from 'react';
-import { Tabs } from 'expo-router';
+import { ActivityIndicator, View } from 'react-native';
+import { Redirect, Tabs } from 'expo-router';
 
+import { useProfile } from '@/contexts/ProfileContext';
 import { useTheme } from '@/theme';
 
 /**
- * Navegação por tabs (T002). O gate de onboarding (redirecionar para
- * `/onboarding` quando não houver perfil local) é adicionado na Fase 1,
- * quando o `ProfileContext` passa a existir.
+ * Gate de onboarding (T011): enquanto o perfil local ainda está carregando,
+ * mostra um spinner; se não existir perfil, redireciona para `/onboarding`
+ * antes de expor qualquer tab. Isso garante que nenhuma tela do app seja
+ * alcançável sem um perfil criado.
  */
 export default function TabsLayout() {
   const theme = useTheme();
+  const { status, hasProfile } = useProfile();
+
+  if (status === 'loading') {
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: theme.colors.background,
+        }}
+      >
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    );
+  }
+
+  if (!hasProfile) {
+    return <Redirect href="/onboarding" />;
+  }
 
   return (
     <Tabs
