@@ -1,28 +1,40 @@
 import React, { useCallback } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
-import { Link, useFocusEffect } from 'expo-router';
-import { Image } from 'expo-image';
+import { FlatList, StyleSheet, Text } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
 
 import { AsyncStateView } from '@/components/AsyncStateView';
+import { ListingCard } from '@/components/ListingCard';
 import { ScreenContainer } from '@/components/ScreenContainer';
-import { useActiveListingsFeed } from '@/hooks/useActiveListingsFeed';
+import { useListings } from '@/contexts/ListingsContext';
 import { useTheme } from '@/theme';
+import type { Listing } from '@/types/listing';
 
 /**
- * Feed principal (US3, Fase 3). Listagem mínima nesta rodada — apenas o
- * suficiente para validar que um anúncio publicado em `new-listing.tsx`
- * (T012-T017) é persistido e recuperável. `FlatList` virtualizada com
- * busca/distância/ordenação completas entra em T018-T021.
+ * Feed principal (US3, T019): lista virtualizada (`FlatList`) de todos os
+ * anúncios ativos (não só os do usuário), via `ListingsContext` — o mesmo
+ * estado global consumido pela busca (`search.tsx`), evitando duas
+ * consultas independentes ao repositório.
  */
 export default function FeedScreen() {
   const theme = useTheme();
-  const { status, listings, error, refresh } = useActiveListingsFeed();
+  const { status, listings, error, refresh } = useListings();
 
   // Recarrega ao voltar para a aba (ex: após publicar um anúncio novo).
   useFocusEffect(
     useCallback(() => {
       refresh();
     }, [refresh]),
+  );
+
+  const goToListing = useCallback((id: string) => {
+    router.push(`/listing/${id}`);
+  }, []);
+
+  const renderItem = useCallback(
+    ({ item }: { item: Listing }) => (
+      <ListingCard listing={item} onPress={() => goToListing(item.id)} />
+    ),
+    [goToListing],
   );
 
   return (
@@ -53,45 +65,9 @@ export default function FeedScreen() {
             data={listings}
             keyExtractor={(listing) => listing.id}
             contentContainerStyle={styles.list}
-            renderItem={({ item }) => (
-              <Link href={`/listing/${item.id}`} asChild>
-                <View
-                  style={[
-                    styles.card,
-                    { borderColor: theme.colors.border, borderRadius: theme.radius.md },
-                  ]}
-                >
-                  {item.photos[0] ? (
-                    <Image
-                      source={{ uri: item.photos[0] }}
-                      style={[styles.thumbnail, { borderRadius: theme.radius.sm }]}
-                      contentFit="cover"
-                    />
-                  ) : null}
-                  <View style={styles.cardInfo}>
-                    <Text
-                      numberOfLines={1}
-                      style={{
-                        color: theme.colors.text,
-                        fontSize: theme.typography.size.md,
-                        fontWeight: '600',
-                      }}
-                    >
-                      {item.title}
-                    </Text>
-                    <Text
-                      style={{
-                        color: theme.colors.textMuted,
-                        fontSize: theme.typography.size.sm,
-                      }}
-                    >
-                      {item.price != null ? `R$ ${item.price.toFixed(2)}` : 'A combinar'}{' '}
-                      · {item.category}
-                    </Text>
-                  </View>
-                </View>
-              </Link>
-            )}
+            renderItem={renderItem}
+            onRefresh={refresh}
+            refreshing={status === 'loading'}
           />
         )}
       </AsyncStateView>
@@ -106,20 +82,5 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: 12,
-  },
-  card: {
-    flexDirection: 'row',
-    gap: 12,
-    padding: 12,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  thumbnail: {
-    width: 64,
-    height: 64,
-  },
-  cardInfo: {
-    flex: 1,
-    gap: 2,
   },
 });
