@@ -17,3 +17,27 @@ export type Listing = {
   status: ListingStatus;
   createdAt: string;
 };
+
+export type CreateListingInput = {
+  ownerId: string;
+  title: string;
+  description: string;
+  price?: number | null;
+  category: ListingCategory;
+  type: ListingType;
+  photos: string[];
+  lat: number;
+  lng: number;
+};
+
+export type UpdateListingInput = Partial<{
+  title: string;
+  description: string;
+  price: number | null;
+  category: ListingCategory;
+  type: ListingType;
+  photos: string[];
+  lat: number;
+  lng: number;
+  status: ListingStatus;
+}>;
