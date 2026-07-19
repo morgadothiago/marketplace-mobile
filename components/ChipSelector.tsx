@@ -8,6 +8,13 @@ type ChipSelectorProps<T extends string> = {
   options: readonly T[];
   value: T;
   onChange: (value: T) => void;
+  /**
+   * Converte o valor interno da opção para o texto exibido no chip. Default
+   * exibe o próprio valor (ex: categorias, já em pt-BR). Usado pelo seletor
+   * de tipo de anúncio para traduzir o enum `ListingType` ('product'/
+   * 'service') sem alterar o valor persistido.
+   */
+  renderLabel?: (option: T) => string;
 };
 
 /**
@@ -20,6 +27,7 @@ function ChipSelectorComponent<T extends string>({
   options,
   value,
   onChange,
+  renderLabel = (option) => option,
 }: ChipSelectorProps<T>) {
   const theme = useTheme();
 
@@ -60,7 +68,7 @@ function ChipSelectorComponent<T extends string>({
                   fontWeight: selected ? '600' : '400',
                 }}
               >
-                {option}
+                {renderLabel(option)}
               </Text>
             </Pressable>
           );

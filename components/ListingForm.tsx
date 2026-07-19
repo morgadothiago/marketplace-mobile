@@ -9,6 +9,7 @@ import { ListingPhotoPicker } from '@/components/ListingPhotoPicker';
 import { useListingForm } from '@/hooks/useListingForm';
 import { useTheme } from '@/theme';
 import { LISTING_CATEGORIES } from '@/types/category';
+import { LISTING_TYPE_LABELS } from '@/types/listing';
 import type { Listing } from '@/types/listing';
 
 const LISTING_TYPES = ['product', 'service'] as const;
@@ -75,6 +76,7 @@ export function ListingForm({ listing = null, onCancel, onSaved }: ListingFormPr
             options={LISTING_TYPES}
             value={field.value}
             onChange={field.onChange}
+            renderLabel={(option) => LISTING_TYPE_LABELS[option]}
           />
         )}
       />
