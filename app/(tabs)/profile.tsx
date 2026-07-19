@@ -5,8 +5,10 @@ import { AppButton } from '@/components/AppButton';
 import { AsyncStateView } from '@/components/AsyncStateView';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
 import { ProfileForm } from '@/components/ProfileForm';
+import { RatingStars } from '@/components/RatingStars';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { useProfile } from '@/contexts/ProfileContext';
+import { useRatingSummary } from '@/hooks/useRatingSummary';
 import { useTheme } from '@/theme';
 
 /**
@@ -19,6 +21,7 @@ export default function ProfileScreen() {
   const theme = useTheme();
   const { profile, status, error, refresh } = useProfile();
   const [isEditing, setIsEditing] = useState(false);
+  const { average: ratingAverage, count: ratingCount } = useRatingSummary(profile?.id);
 
   return (
     <ScreenContainer scrollable edges={['top']}>
@@ -53,6 +56,7 @@ export default function ProfileScreen() {
               >
                 {profile.neighborhood}
               </Text>
+              <RatingStars rating={ratingAverage} count={ratingCount} showValue size={18} />
               {profile.externalContact ? (
                 <Text
                   style={[
