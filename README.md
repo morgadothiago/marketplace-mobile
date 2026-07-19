@@ -5,6 +5,7 @@ Marketplace local — conecta compradores e vendedores de uma mesma região para
 ![Expo](https://img.shields.io/badge/Expo-SDK%2054-000020?logo=expo&logoColor=white)
 ![React Native](https://img.shields.io/badge/React%20Native-0.81-61DAFB?logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
+![Tests](https://img.shields.io/badge/tests-30%20passing-16A34A?logo=jest&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## 📱 O que é
@@ -12,6 +13,17 @@ Marketplace local — conecta compradores e vendedores de uma mesma região para
 App mobile de marketplace local: cadastro de perfil, publicação de anúncios (produtos ou serviços), busca e filtro por proximidade (geolocalização), contato entre comprador e vendedor, e avaliações — tudo funcionando **offline-first**, com dados salvos localmente no dispositivo (SQLite).
 
 Pensado para conectar vizinhos e comércio de bairro: alguém anuncia um produto ou serviço, e quem está por perto encontra por busca ou por distância.
+
+## 📸 Screenshots
+
+<!-- Adicione aqui os prints do app rodando no simulador. Sugestão de tabela: -->
+<!--
+| Feed | Busca / Filtros | Detalhe do Anúncio |
+|---|---|---|
+| ![Feed](screenshots/feed.png) | ![Busca](screenshots/busca.png) | ![Detalhe](screenshots/detalhe.png) |
+-->
+
+*(em breve)*
 
 ## ✨ Features (MVP)
 
@@ -37,6 +49,7 @@ Fora de escopo nesta fase: autenticação real, pagamentos, chat com push real, 
 - **React Hook Form + Zod** — formulários e validação
 - **Context + useReducer** — estado global
 - **TypeScript estrito** em todo o projeto
+- **Jest + jest-expo** — 30 testes cobrindo `utils/distance.ts` e os 4 repositories
 - **ESLint + Prettier** configurados
 
 ## 🏗️ Arquitetura
@@ -96,6 +109,7 @@ npm run android     # abre direto no emulador Android
 npm run typecheck   # verifica tipos TypeScript
 npm run lint        # roda ESLint
 npm run format      # formata com Prettier
+npm test            # roda a suíte de testes (Jest)
 ```
 
 ## ✅ Status: MVP completo

@@ -16,6 +16,8 @@ Stack:
 
 O fluxo completo já roda de ponta a ponta: criar perfil → publicar anúncio (com fotos e localização) → buscar/filtrar por categoria e proximidade → contato via chat mock ou WhatsApp → avaliação com estrelas.
 
+Também cobri as partes menos "glamurosas" que costumam ficar de fora de projeto de portfolio: 30 testes automatizados (Jest) cobrindo as regras de negócio e o cálculo de distância, e uma identidade visual própria (ícone, splash screen) em vez do ícone padrão do Expo.
+
 Código aberto no GitHub: https://github.com/morgadothiago/marketplace-mobile
 
 #ReactNative #Expo #MobileDevelopment #SpecDrivenDevelopment #TypeScript
@@ -31,6 +33,8 @@ A ideia: um marketplace local — tipo um "OLX de bairro" — onde você anuncia
 Construído em React Native com Expo, 100% local nesse primeiro momento (SQLite no dispositivo, sem backend ainda) — o foco do MVP foi validar o fluxo completo: perfil → anúncio → busca/proximidade → contato → avaliação. E funciona, de ponta a ponta, no celular de verdade.
 
 O que fiz diferente dessa vez: usei spec-driven development do início ao fim. Especifiquei o produto, planejei a arquitetura e quebrei em tasks antes de escrever código — tudo documentado e versionado no repositório, fase por fase. Ajudou muito a manter o escopo do MVP sob controle e já deixar a base pronta pra evoluir pra um backend real depois (a camada de dados já é isolada pra isso).
+
+Também não deixei de lado testes automatizados e uma identidade visual própria pro app — coisas que costumam ficar pra depois em projeto pessoal e no fim nunca saem do papel.
 
 Repo no GitHub: https://github.com/morgadothiago/marketplace-mobile
 
