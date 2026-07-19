@@ -17,11 +17,12 @@ type SortSelectorProps<T extends string> = {
 };
 
 /**
- * Seletor de ordenação (T021). Suporta opções desabilitadas com um selo
- * "em breve" — usado para "Mais próximo", que depende do cálculo de
- * distância (`utils/distance.ts`, Fase 4/T022) e ainda não existe. Mantém
- * a opção visível na UI para comunicar o roadmap sem bloquear o fluxo de
- * busca atual.
+ * Seletor de opções em chips, genérico (T021) — usado tanto para ordenação
+ * ("Mais recente"/"Mais próximo") quanto para o filtro de raio de distância
+ * (Fase 4/T024) na busca. Suporta opções desabilitadas com um selo
+ * "em breve": "Mais próximo" e o filtro de raio ficam desabilitados quando
+ * não há localização do usuário disponível (`useUserLocation`), sem
+ * bloquear o restante da busca.
  */
 function SortSelectorComponent<T extends string>({
   label,

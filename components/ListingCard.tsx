@@ -1,8 +1,10 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 
 import { useTheme } from '@/theme';
+import { useUserLocation } from '@/hooks/useUserLocation';
+import { distanceBetweenKm, formatDistanceKm } from '@/utils/distance';
 import type { Listing } from '@/types/listing';
 
 type ListingCardProps = {
@@ -18,14 +20,26 @@ function formatPrice(price: number | null): string {
  * Card de anúncio reutilizável (T018) — usado pelo feed (`index.tsx`) e pela
  * busca (`search.tsx`) para não duplicar o layout de item da lista.
  *
- * A distância fica com espaço reservado ("—") em vez de calculada: o
- * cálculo real (haversine + localização do usuário) é escopo da Fase 4
- * (T022/T025). Reservar o espaço agora evita retrabalho de layout quando o
- * badge de distância for ligado.
+ * Badge de distância (T025): calculado em runtime via `useUserLocation` +
+ * `utils/distance.ts` (haversine), nunca persistido. Sem coordenadas do
+ * usuário (permissão negada/indisponível), mostra o bairro do perfil como
+ * fallback textual em vez de bloquear o card.
  */
 function ListingCardComponent({ listing, onPress }: ListingCardProps) {
   const theme = useTheme();
   const coverPhoto = listing.photos[0];
+  const { coordinates: userCoordinates, neighborhoodFallback } = useUserLocation();
+
+  const distanceLabel = useMemo(() => {
+    if (userCoordinates) {
+      const distanceKm = distanceBetweenKm(userCoordinates, {
+        lat: listing.lat,
+        lng: listing.lng,
+      });
+      return formatDistanceKm(distanceKm);
+    }
+    return neighborhoodFallback ?? 'Distância indisponível';
+  }, [userCoordinates, neighborhoodFallback, listing.lat, listing.lng]);
 
   return (
     <Pressable
@@ -86,12 +100,13 @@ function ListingCardComponent({ listing, onPress }: ListingCardProps) {
         </Text>
 
         <Text
+          numberOfLines={1}
           style={{
             color: theme.colors.textMuted,
             fontSize: theme.typography.size.xs,
           }}
         >
-          Distância: em breve
+          {distanceLabel}
         </Text>
       </View>
     </Pressable>

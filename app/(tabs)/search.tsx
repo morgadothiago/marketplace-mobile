@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -10,16 +10,28 @@ import { MultiChipSelector } from '@/components/MultiChipSelector';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { SortSelector, type SortOption } from '@/components/SortSelector';
 import { useListings } from '@/contexts/ListingsContext';
+import { useUserLocation } from '@/hooks/useUserLocation';
 import { useTheme } from '@/theme';
+import { distanceBetweenKm } from '@/utils/distance';
 import { LISTING_CATEGORIES, type ListingCategory } from '@/types/category';
 import type { Listing } from '@/types/listing';
 
 type SortValue = 'recent' | 'price_asc' | 'nearest';
+type RadiusValue = 'none' | '1' | '5' | '10' | '25';
 
-const SORT_OPTIONS: readonly SortOption<SortValue>[] = [
-  { value: 'recent', label: 'Mais recente' },
-  { value: 'price_asc', label: 'Menor preço' },
-  { value: 'nearest', label: 'Mais próximo', disabled: true },
+const RADIUS_KM_BY_VALUE: Record<Exclude<RadiusValue, 'none'>, number> = {
+  '1': 1,
+  '5': 5,
+  '10': 10,
+  '25': 25,
+};
+
+const RADIUS_OPTIONS: readonly SortOption<RadiusValue>[] = [
+  { value: 'none', label: 'Sem limite' },
+  { value: '1', label: '1 km' },
+  { value: '5', label: '5 km' },
+  { value: '10', label: '10 km' },
+  { value: '25', label: '25 km' },
 ];
 
 /**
@@ -27,15 +39,36 @@ const SORT_OPTIONS: readonly SortOption<SortValue>[] = [
  * de anúncios ativos do `ListingsContext` (mesma fonte que o feed) — filtra
  * e ordena em memória, sem nova consulta ao repositório.
  *
- * "Mais próximo" fica visível mas desabilitado até a Fase 4 (T022), que
- * introduz o cálculo de distância em `utils/distance.ts`.
+ * Filtro por raio e ordenação "Mais próximo" (Fase 4/T024) dependem da
+ * localização do usuário (`useUserLocation`) para calcular a distância até
+ * cada anúncio (`utils/distance.ts`). Sem coordenadas (permissão negada ou
+ * indisponível), ambos ficam desabilitados — busca por texto e categoria
+ * continuam funcionando normalmente, nunca bloqueando o uso do app.
  */
 export default function SearchScreen() {
   const theme = useTheme();
   const { status, listings, error, refresh } = useListings();
+  const { coordinates: userCoordinates, neighborhoodFallback } = useUserLocation();
   const [query, setQuery] = useState('');
   const [categories, setCategories] = useState<ListingCategory[]>([]);
   const [sort, setSort] = useState<SortValue>('recent');
+  const [radius, setRadius] = useState<RadiusValue>('none');
+
+  const hasLocation = userCoordinates !== null;
+
+  const sortOptions: readonly SortOption<SortValue>[] = useMemo(
+    () => [
+      { value: 'recent', label: 'Mais recente' },
+      { value: 'price_asc', label: 'Menor preço' },
+      { value: 'nearest', label: 'Mais próximo', disabled: !hasLocation },
+    ],
+    [hasLocation],
+  );
+
+  const radiusOptions: readonly SortOption<RadiusValue>[] = useMemo(
+    () => RADIUS_OPTIONS.map((option) => ({ ...option, disabled: !hasLocation })),
+    [hasLocation],
+  );
 
   const toggleCategory = useCallback((category: ListingCategory) => {
     setCategories((current) =>
@@ -45,31 +78,56 @@ export default function SearchScreen() {
     );
   }, []);
 
+  // Se a localização deixar de estar disponível (ex: permissão revogada),
+  // volta os controles dependentes dela para o estado neutro em vez de
+  // manter uma ordenação/filtro que não pode mais ser calculado.
+  useEffect(() => {
+    if (!hasLocation) {
+      setRadius('none');
+      setSort((current) => (current === 'nearest' ? 'recent' : current));
+    }
+  }, [hasLocation]);
+
   const results = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
+    const radiusKm = hasLocation && radius !== 'none' ? RADIUS_KM_BY_VALUE[radius] : null;
 
-    const filtered = listings.filter((listing) => {
+    const withDistance = listings.map((listing) => ({
+      listing,
+      distanceKm: userCoordinates
+        ? distanceBetweenKm(userCoordinates, { lat: listing.lat, lng: listing.lng })
+        : null,
+    }));
+
+    const filtered = withDistance.filter(({ listing, distanceKm }) => {
       const matchesQuery =
         normalizedQuery.length === 0 ||
         listing.title.toLowerCase().includes(normalizedQuery) ||
         listing.description.toLowerCase().includes(normalizedQuery);
       const matchesCategory =
         categories.length === 0 || categories.includes(listing.category);
-      return matchesQuery && matchesCategory;
+      const matchesRadius =
+        radiusKm === null || (distanceKm !== null && distanceKm <= radiusKm);
+      return matchesQuery && matchesCategory && matchesRadius;
     });
 
     const sorted = [...filtered].sort((a, b) => {
+      if (sort === 'nearest') {
+        const distanceA = a.distanceKm ?? Number.POSITIVE_INFINITY;
+        const distanceB = b.distanceKm ?? Number.POSITIVE_INFINITY;
+        return distanceA - distanceB;
+      }
       if (sort === 'price_asc') {
-        const priceA = a.price ?? Number.POSITIVE_INFINITY;
-        const priceB = b.price ?? Number.POSITIVE_INFINITY;
+        const priceA = a.listing.price ?? Number.POSITIVE_INFINITY;
+        const priceB = b.listing.price ?? Number.POSITIVE_INFINITY;
         return priceA - priceB;
       }
       // 'recent' (default) — created_at ISO string, mais novo primeiro.
-      return b.createdAt.localeCompare(a.createdAt);
+      return b.listing.createdAt.localeCompare(a.listing.createdAt);
     });
 
-    return sorted;
-  }, [listings, query, categories, sort]);
+    return sorted.map(({ listing }) => listing);
+  }, [listings, query, categories, sort, radius, hasLocation, userCoordinates]);
 
   const goToListing = useCallback((id: string) => {
     router.push(`/listing/${id}`);
@@ -129,7 +187,27 @@ export default function SearchScreen() {
         onToggle={toggleCategory}
       />
 
-      <SortSelector label="Ordenar por" options={SORT_OPTIONS} value={sort} onChange={setSort} />
+      <SortSelector label="Ordenar por" options={sortOptions} value={sort} onChange={setSort} />
+
+      <SortSelector
+        label="Distância máxima"
+        options={radiusOptions}
+        value={radius}
+        onChange={setRadius}
+      />
+
+      {!hasLocation && (
+        <Text
+          style={[
+            styles.locationHint,
+            { color: theme.colors.textMuted, fontSize: theme.typography.size.xs },
+          ]}
+        >
+          {neighborhoodFallback
+            ? `Sem acesso à localização. Busque manualmente pelo bairro, ex: "${neighborhoodFallback}".`
+            : 'Sem acesso à localização. Ative a permissão para filtrar e ordenar por proximidade.'}
+        </Text>
+      )}
 
       <AsyncStateView
         loading={status === 'loading'}
@@ -156,6 +234,9 @@ export default function SearchScreen() {
 }
 
 const styles = StyleSheet.create({
+  locationHint: {
+    marginTop: 8,
+  },
   title: {
     fontWeight: '700',
     marginBottom: 16,
