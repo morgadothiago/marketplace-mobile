@@ -5,3 +5,9 @@ export type Message = {
   body: string;
   createdAt: string;
 };
+
+export type CreateMessageInput = {
+  listingId: string;
+  senderId: string;
+  body: string;
+};
