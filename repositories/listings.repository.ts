@@ -142,8 +142,7 @@ export async function updateListing(
     price: input.price !== undefined ? input.price : current.price,
     category: input.category !== undefined ? input.category : current.category,
     type: input.type !== undefined ? input.type : current.type,
-    photos:
-      input.photos !== undefined ? JSON.stringify(input.photos) : current.photos,
+    photos: input.photos !== undefined ? JSON.stringify(input.photos) : current.photos,
     lat: input.lat !== undefined ? input.lat : current.lat,
     lng: input.lng !== undefined ? input.lng : current.lng,
     status: input.status !== undefined ? input.status : current.status,
