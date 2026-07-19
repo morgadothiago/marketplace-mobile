@@ -46,5 +46,5 @@ Bora trocar ideia se você também tá construindo algo parecido 👇
 
 ## Dicas de uso
 - Link do repo já preenchido nas duas versões: https://github.com/morgadothiago/marketplace-mobile
-- Adicione print/gif do app rodando (feed, busca por proximidade, chat, avaliação) — posts com mídia têm bem mais alcance
+- Prints já estão em `screenshots/` no repo (feed, busca/filtros, detalhe do anúncio, formulário de publicar) — use esses mesmos como carrossel de imagens no post, ou grave um GIF navegando entre as telas pra ter ainda mais alcance
 - Escolha a Versão 1 se seu público no LinkedIn é mais técnico (recrutadores, devs); Versão 2 se quer engajamento mais amplo
