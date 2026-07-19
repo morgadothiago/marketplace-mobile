@@ -14,7 +14,7 @@ export default function ListingChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   return (
-    <ScreenContainer>
+    <ScreenContainer edges={['bottom']}>
       <Text
         style={{
           color: theme.colors.text,
@@ -28,7 +28,7 @@ export default function ListingChatScreen() {
         style={{
           color: theme.colors.textMuted,
           fontSize: theme.typography.size.md,
-          marginTop: 8,
+          marginTop: theme.spacing.sm,
         }}
       >
         Em breve: thread de mensagens mock.
