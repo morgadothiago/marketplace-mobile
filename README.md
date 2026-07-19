@@ -2,8 +2,8 @@
 
 Marketplace local — conecta compradores e vendedores de uma mesma região para troca de produtos e serviços, direto do celular.
 
-![Expo](https://img.shields.io/badge/Expo-SDK%2057-000020?logo=expo&logoColor=white)
-![React Native](https://img.shields.io/badge/React%20Native-0.86-61DAFB?logo=react&logoColor=black)
+![Expo](https://img.shields.io/badge/Expo-SDK%2054-000020?logo=expo&logoColor=white)
+![React Native](https://img.shields.io/badge/React%20Native-0.81-61DAFB?logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -29,7 +29,7 @@ Fora de escopo nesta fase: autenticação real, pagamentos, chat com push real, 
 
 ## 🧱 Stack
 
-- **Expo SDK 57** (React Native 0.86, React 19.2)
+- **Expo SDK 54** (React Native 0.81, React 19.1) — versão escolhida para compatibilidade com o app Expo Go publicado nas lojas (testado em dispositivo real)
 - **expo-router** — navegação file-based
 - **expo-sqlite** — persistência local, 100% assíncrono
 - **expo-location** — geolocalização com fallback manual por bairro
@@ -98,17 +98,29 @@ npm run lint        # roda ESLint
 npm run format      # formata com Prettier
 ```
 
-## 🗺️ Roadmap
+## ✅ Status: MVP completo
+
+Todas as fases planejadas para o MVP foram implementadas, validadas (typecheck + lint + build) e estão versionadas neste repositório:
 
 - [x] Fase 0 — Scaffold do projeto (Expo Router, tema, SQLite)
 - [x] Fase 1 — Perfil (onboarding, edição)
-- [ ] Fase 2 — Publicar anúncio (formulário, upload de fotos, localização)
-- [ ] Fase 3 — Listagem e busca
-- [ ] Fase 4 — Geolocalização e filtro de proximidade
-- [ ] Fase 5 — Contato / chat mock
-- [ ] Fase 6 — Avaliações
-- [ ] Fase 7 — Polish
-- [ ] **Fase futura:** backend real (API + banco remoto), autenticação, sincronização multi-dispositivo
+- [x] Fase 2 — Publicar anúncio (formulário, upload de fotos, localização, editar/pausar/excluir)
+- [x] Fase 3 — Listagem e busca (feed, busca por texto/categoria, ordenação)
+- [x] Fase 4 — Geolocalização e filtro de proximidade (haversine, badge de distância, filtro de raio)
+- [x] Fase 5 — Contato / chat mock (thread por anúncio, botão WhatsApp/tel)
+- [x] Fase 6 — Avaliações (estrelas + comentário, média no perfil, sem auto-avaliação)
+- [x] Fase 7 — Polish de UI/UX (safe area, ícones, loading/empty states) e documentação
+
+## 🗺️ Roadmap futuro (fora do escopo deste MVP)
+
+O app hoje é **100% local/offline** — sem backend, sem autenticação real, sem sincronização entre dispositivos. Isso foi uma decisão consciente de escopo para validar o produto rápido. Próximos passos naturais, caso o projeto avance:
+
+- **Backend real** (API REST/NestJS + banco remoto Postgres): a camada `repositories/` já isola todo acesso a dados, então trocar SQLite local por chamadas HTTP é uma troca de implementação, não uma reescrita de telas
+- **Autenticação** (login social, OTP, JWT) — hoje o "perfil" é só local, sem identidade verificada
+- **Sincronização multi-dispositivo** e backup em nuvem
+- **Chat em tempo real** com push notification (hoje é mock, grava/lê do SQLite local)
+- **Moderação de conteúdo** e sistema de denúncias
+- **Pagamentos / checkout** dentro do app
 
 ## 📄 Licença
 
