@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { AsyncStateView } from '@/components/AsyncStateView';
+import { EmptyState } from '@/components/EmptyState';
 import { ListingForm } from '@/components/ListingForm';
 import { OwnListingItem } from '@/components/OwnListingItem';
 import { ScreenContainer } from '@/components/ScreenContainer';
@@ -22,7 +23,7 @@ export default function NewListingScreen() {
   const [editingListing, setEditingListing] = useState<Listing | null>(null);
 
   return (
-    <ScreenContainer scrollable>
+    <ScreenContainer scrollable edges={['top']}>
       <ListingForm
         key={editingListing?.id ?? 'new'}
         listing={editingListing}
@@ -47,16 +48,13 @@ export default function NewListingScreen() {
           loading={status === 'loading'}
           errorMessage={error}
           onRetry={refresh}
+          loadingMessage="Carregando seus anúncios..."
         >
           {listings.length === 0 ? (
-            <Text
-              style={{
-                color: theme.colors.textMuted,
-                fontSize: theme.typography.size.md,
-              }}
-            >
-              Você ainda não publicou nenhum anúncio.
-            </Text>
+            <EmptyState
+              icon="pricetag-outline"
+              message="Você ainda não publicou nenhum anúncio."
+            />
           ) : (
             <View style={styles.list}>
               {listings.map((listing) => (

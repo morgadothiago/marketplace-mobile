@@ -1,8 +1,10 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { FlatList, StyleSheet, Text, TextInput } from 'react-native';
+import { FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
 import { AsyncStateView } from '@/components/AsyncStateView';
+import { EmptyState } from '@/components/EmptyState';
 import { ListingCard } from '@/components/ListingCard';
 import { MultiChipSelector } from '@/components/MultiChipSelector';
 import { ScreenContainer } from '@/components/ScreenContainer';
@@ -81,7 +83,7 @@ export default function SearchScreen() {
   );
 
   return (
-    <ScreenContainer>
+    <ScreenContainer edges={['top']}>
       <Text
         style={[
           styles.title,
@@ -91,23 +93,34 @@ export default function SearchScreen() {
         Buscar
       </Text>
 
-      <TextInput
-        value={query}
-        onChangeText={setQuery}
-        placeholder="Buscar por título ou descrição"
-        placeholderTextColor={theme.colors.textMuted}
+      <View
         style={[
-          styles.input,
+          styles.inputWrapper,
           {
-            color: theme.colors.text,
             borderColor: theme.colors.border,
             backgroundColor: theme.colors.surface,
             borderRadius: theme.radius.md,
             paddingHorizontal: theme.spacing.md,
-            paddingVertical: theme.spacing.sm,
+            gap: theme.spacing.sm,
           },
         ]}
-      />
+      >
+        <Ionicons name="search-outline" size={18} color={theme.colors.textMuted} />
+        <TextInput
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Buscar por título ou descrição"
+          placeholderTextColor={theme.colors.textMuted}
+          style={[
+            styles.input,
+            {
+              color: theme.colors.text,
+              fontSize: theme.typography.size.md,
+              paddingVertical: theme.spacing.sm,
+            },
+          ]}
+        />
+      </View>
 
       <MultiChipSelector
         label="Categoria"
@@ -122,17 +135,13 @@ export default function SearchScreen() {
         loading={status === 'loading'}
         errorMessage={error}
         onRetry={refresh}
+        loadingMessage="Carregando anúncios..."
       >
         {results.length === 0 ? (
-          <Text
-            style={{
-              color: theme.colors.textMuted,
-              fontSize: theme.typography.size.md,
-              marginTop: theme.spacing.md,
-            }}
-          >
-            Nenhum anúncio encontrado com esses filtros.
-          </Text>
+          <EmptyState
+            icon="search-outline"
+            message="Nenhum anúncio encontrado com esses filtros."
+          />
         ) : (
           <FlatList
             data={results}
@@ -151,9 +160,14 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 16,
   },
-  input: {
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
     marginBottom: 12,
+  },
+  input: {
+    flex: 1,
   },
   list: {
     gap: 12,
