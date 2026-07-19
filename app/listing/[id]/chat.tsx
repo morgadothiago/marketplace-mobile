@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Linking, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 
 import { AppButton } from '@/components/AppButton';
@@ -8,14 +8,20 @@ import { AsyncStateView } from '@/components/AsyncStateView';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { useListingChat } from '@/hooks/useListingChat';
 import { useTheme } from '@/theme';
+import { resolveExternalContactAction } from '@/utils/contact';
 import type { Message } from '@/types/message';
 
 /**
- * Thread de contato mock por anúncio (US5, T027). Sem WebSocket/push real:
- * `useListingChat` grava a mensagem local e recarrega a thread, mesmo
+ * Thread de contato mock por anúncio (US5, T027-T028). Sem WebSocket/push
+ * real: `useListingChat` grava a mensagem local e recarrega a thread, mesmo
  * padrão de qualquer outra escrita do app (repositório -> refresh). A
  * interface (hook + repository isolados da UI) já fica pronta para trocar
  * por um backend real sem reescrever esta tela.
+ *
+ * Botão de contato externo (T028): exibido apenas se o dono do anúncio
+ * preencheu `external_contact` no perfil — resolvido por uma função pura
+ * (`utils/contact.ts`) para não acoplar a heurística de "parece telefone" à
+ * UI, e aberto via `Linking` (sem biblioteca extra).
  */
 export default function ListingChatScreen() {
   const theme = useTheme();
@@ -42,6 +48,17 @@ export default function ListingChatScreen() {
     setDraft('');
   }, [draft, send]);
 
+  const contactAction = resolveExternalContactAction(ownerProfile?.externalContact);
+  const handleOpenExternalContact = useCallback(async () => {
+    if (!contactAction) {
+      return;
+    }
+    const canOpen = await Linking.canOpenURL(contactAction.url);
+    if (canOpen) {
+      await Linking.openURL(contactAction.url);
+    }
+  }, [contactAction]);
+
   return (
     <ScreenContainer edges={['bottom']} style={styles.screenContent}>
       <AsyncStateView
@@ -65,6 +82,16 @@ export default function ListingChatScreen() {
             Conversa com {ownerProfile?.name ?? 'o vendedor'}
           </Text>
         </View>
+
+        {contactAction ? (
+          <AppButton
+            label={contactAction.label}
+            icon={contactAction.icon}
+            variant="secondary"
+            onPress={handleOpenExternalContact}
+            style={{ marginTop: theme.spacing.md }}
+          />
+        ) : null}
 
         <FlatList
           data={messages}
