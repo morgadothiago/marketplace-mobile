@@ -78,21 +78,33 @@ function OwnListingItemComponent({
       </View>
 
       <View style={styles.actions}>
-        <AppButton label="Editar" onPress={() => onEdit(listing)} variant="secondary" />
+        <AppButton
+          label="Editar"
+          onPress={() => onEdit(listing)}
+          variant="secondary"
+          icon="create-outline"
+        />
         {listing.status === 'active' ? (
           <AppButton
             label="Pausar"
             onPress={() => onPause(listing.id)}
             variant="secondary"
+            icon="pause-outline"
           />
         ) : (
           <AppButton
             label="Reativar"
             onPress={() => onReactivate(listing.id)}
             variant="secondary"
+            icon="play-outline"
           />
         )}
-        <AppButton label="Excluir" onPress={confirmDelete} variant="danger" />
+        <AppButton
+          label="Excluir"
+          onPress={confirmDelete}
+          variant="danger"
+          icon="trash-outline"
+        />
       </View>
     </View>
   );

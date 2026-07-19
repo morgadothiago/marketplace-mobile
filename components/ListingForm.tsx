@@ -173,6 +173,7 @@ export function ListingForm({ listing = null, onCancel, onSaved }: ListingFormPr
           label={coordinates ? 'Atualizar localização' : 'Usar minha localização atual'}
           onPress={captureLocation}
           variant="secondary"
+          icon={coordinates ? 'navigate' : 'location-outline'}
           loading={locationLoading}
         />
         {locationError ? (
@@ -194,11 +195,17 @@ export function ListingForm({ listing = null, onCancel, onSaved }: ListingFormPr
       <AppButton
         label={isEditing ? 'Salvar alterações' : 'Publicar anúncio'}
         onPress={submit}
+        icon={isEditing ? 'checkmark-outline' : 'add-circle-outline'}
         loading={saveStatus === 'saving'}
         style={styles.saveButton}
       />
       {onCancel ? (
-        <AppButton label="Cancelar" onPress={onCancel} variant="secondary" />
+        <AppButton
+          label="Cancelar"
+          onPress={onCancel}
+          variant="secondary"
+          icon="close-outline"
+        />
       ) : null}
     </View>
   );

@@ -3,6 +3,7 @@ import { FlatList, StyleSheet, Text } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 
 import { AsyncStateView } from '@/components/AsyncStateView';
+import { EmptyState } from '@/components/EmptyState';
 import { ListingCard } from '@/components/ListingCard';
 import { ScreenContainer } from '@/components/ScreenContainer';
 import { useListings } from '@/contexts/ListingsContext';
@@ -38,7 +39,7 @@ export default function FeedScreen() {
   );
 
   return (
-    <ScreenContainer>
+    <ScreenContainer edges={['top']}>
       <Text
         style={[
           styles.title,
@@ -52,14 +53,15 @@ export default function FeedScreen() {
         loading={status === 'loading'}
         errorMessage={error}
         onRetry={refresh}
+        loadingMessage="Carregando anúncios..."
       >
         {listings.length === 0 ? (
-          <Text
-            style={{ color: theme.colors.textMuted, fontSize: theme.typography.size.md }}
-          >
-            Nenhum anúncio por aqui ainda. Publique o primeiro na aba
-            &quot;Anunciar&quot;.
-          </Text>
+          <EmptyState
+            icon="storefront-outline"
+            message={
+              'Nenhum anúncio por aqui ainda. Publique o primeiro na aba "Anunciar".'
+            }
+          />
         ) : (
           <FlatList
             data={listings}

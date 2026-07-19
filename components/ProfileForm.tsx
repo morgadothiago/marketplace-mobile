@@ -86,6 +86,7 @@ export function ProfileForm({
           label="Alterar foto"
           onPress={choosePhoto}
           variant="secondary"
+          icon="camera-outline"
           loading={pickerLoading}
           style={styles.avatarButton}
         />
@@ -135,11 +136,17 @@ export function ProfileForm({
       <AppButton
         label="Salvar"
         onPress={save}
+        icon="checkmark-outline"
         loading={saveStatus === 'saving'}
         style={styles.saveButton}
       />
       {onCancel ? (
-        <AppButton label="Cancelar" onPress={onCancel} variant="secondary" />
+        <AppButton
+          label="Cancelar"
+          onPress={onCancel}
+          variant="secondary"
+          icon="close-outline"
+        />
       ) : null}
     </View>
   );

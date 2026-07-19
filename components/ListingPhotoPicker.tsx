@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
+import { Ionicons } from '@expo/vector-icons';
 
 import { useTheme } from '@/theme';
 
@@ -51,7 +52,7 @@ function ListingPhotoPickerComponent({
               onPress={() => onRemovePhoto(uri)}
               style={[styles.removeButton, { backgroundColor: theme.colors.danger }]}
             >
-              <Text style={{ color: theme.colors.onPrimary, fontSize: 12 }}>X</Text>
+              <Ionicons name="close" size={14} color={theme.colors.onPrimary} />
             </Pressable>
           </View>
         ))}
@@ -68,13 +69,15 @@ function ListingPhotoPickerComponent({
                 borderColor: theme.colors.border,
                 backgroundColor: theme.colors.surface,
                 opacity: loading ? 0.6 : 1,
+                gap: theme.spacing.xxs,
               },
             ]}
           >
+            <Ionicons name="camera-outline" size={20} color={theme.colors.primary} />
             <Text
-              style={{ color: theme.colors.primary, fontSize: theme.typography.size.sm }}
+              style={{ color: theme.colors.primary, fontSize: theme.typography.size.xs }}
             >
-              {loading ? 'Abrindo...' : '+ Adicionar'}
+              {loading ? 'Abrindo...' : 'Adicionar'}
             </Text>
           </Pressable>
         ) : null}

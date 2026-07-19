@@ -4,13 +4,16 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  View,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 import { useTheme } from '@/theme';
 
 type AppButtonVariant = 'primary' | 'secondary' | 'danger';
+type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
 
 type AppButtonProps = {
   label: string;
@@ -18,6 +21,8 @@ type AppButtonProps = {
   variant?: AppButtonVariant;
   loading?: boolean;
   disabled?: boolean;
+  /** Ícone opcional exibido antes do texto (ex: ações de editar/excluir). */
+  icon?: IoniconName;
   style?: StyleProp<ViewStyle>;
 };
 
@@ -27,6 +32,7 @@ function AppButtonComponent({
   variant = 'primary',
   loading = false,
   disabled = false,
+  icon,
   style,
 }: AppButtonProps) {
   const theme = useTheme();
@@ -62,18 +68,21 @@ function AppButtonComponent({
       {loading ? (
         <ActivityIndicator color={textColor} />
       ) : (
-        <Text
-          style={[
-            styles.label,
-            {
-              color: textColor,
-              fontSize: theme.typography.size.md,
-              fontWeight: theme.typography.weight.semibold,
-            },
-          ]}
-        >
-          {label}
-        </Text>
+        <View style={[styles.content, { gap: theme.spacing.xs }]}>
+          {icon ? <Ionicons name={icon} size={18} color={textColor} /> : null}
+          <Text
+            style={[
+              styles.label,
+              {
+                color: textColor,
+                fontSize: theme.typography.size.md,
+                fontWeight: theme.typography.weight.semibold,
+              },
+            ]}
+          >
+            {label}
+          </Text>
+        </View>
       )}
     </Pressable>
   );
@@ -81,6 +90,11 @@ function AppButtonComponent({
 
 const styles = StyleSheet.create({
   base: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  content: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },

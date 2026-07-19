@@ -21,7 +21,7 @@ export default function ProfileScreen() {
   const [isEditing, setIsEditing] = useState(false);
 
   return (
-    <ScreenContainer scrollable>
+    <ScreenContainer scrollable edges={['top']}>
       <AsyncStateView
         loading={status === 'loading'}
         errorMessage={error}
@@ -64,7 +64,11 @@ export default function ProfileScreen() {
                 </Text>
               ) : null}
             </View>
-            <AppButton label="Editar perfil" onPress={() => setIsEditing(true)} />
+            <AppButton
+              label="Editar perfil"
+              onPress={() => setIsEditing(true)}
+              icon="create-outline"
+            />
           </View>
         )}
       </AsyncStateView>
