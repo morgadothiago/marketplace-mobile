@@ -16,14 +16,13 @@ Pensado para conectar vizinhos e comércio de bairro: alguém anuncia um produto
 
 ## 📸 Screenshots
 
-<!-- Adicione aqui os prints do app rodando no simulador. Sugestão de tabela: -->
-<!--
-| Feed | Busca / Filtros | Detalhe do Anúncio |
-|---|---|---|
-| ![Feed](screenshots/feed.png) | ![Busca](screenshots/busca.png) | ![Detalhe](screenshots/detalhe.png) |
--->
+| Feed | Busca / Filtros |
+|---|---|
+| ![Feed](screenshots/feed.png) | ![Busca e filtros](screenshots/busca-filtros.png) |
 
-*(em breve)*
+| Detalhe do Anúncio | Publicar Anúncio |
+|---|---|
+| ![Detalhe do anúncio](screenshots/detalhe-anuncio.png) | ![Formulário de anúncio](screenshots/anunciar-formulario.png) |
 
 ## ✨ Features (MVP)
 
