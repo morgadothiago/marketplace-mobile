@@ -51,6 +51,18 @@ export async function getLocalProfile(): Promise<Profile | null> {
   return row ? mapRowToProfile(row) : null;
 }
 
+/**
+ * Busca qualquer perfil pelo id (dono do anúncio, remetente de uma
+ * mensagem, etc.) — diferente de `getLocalProfile`, que só resolve o
+ * perfil deste dispositivo. Usado pela thread de chat (T027) para exibir
+ * nome/contato externo do vendedor e identificar remetentes das mensagens.
+ */
+export async function getProfileById(id: string): Promise<Profile | null> {
+  const db = await getDatabase();
+  const row = await db.getFirstAsync<ProfileRow>('SELECT * FROM profiles WHERE id = ?', id);
+  return row ? mapRowToProfile(row) : null;
+}
+
 export async function createProfile(input: CreateProfileInput): Promise<Profile> {
   const db = await getDatabase();
   const profile: Profile = {
